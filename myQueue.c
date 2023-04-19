@@ -4,6 +4,8 @@
 
 
 
+
+
 #define MAX_STRING_SIZE 1024
 
 typedef struct item {
@@ -44,21 +46,21 @@ void enqueue(queue *q, const char *in, int index){
     }
 }
 
-char* dequeue(queue *q) {
+void dequeue(queue *q) {
     if (is_empty(q)) {
         printf("Error: Queue is empty\n");
-        return NULL;
     }
-    item *head = q->head;
-    char* in = head->input;
-    q->head = head->next;
-    free(head->input);
-    free(head->output);
-    free(head);
-    if (q->head == NULL) {
-        q->tail = NULL;
+    else{
+        item *head = q->head;
+        q->head = head->next;
+        free(head->input);
+        free(head->output);
+        free(head);
+        if (q->head == NULL) {
+            q->tail = NULL;
+        }
     }
-    return in;
+    
 }
 
 void printhead(queue *q){
@@ -74,26 +76,79 @@ void printhead(queue *q){
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
     queue q;
     init(&q);
-    printf("Queue is empty: %d\n", is_empty(&q));
-    enqueue(&q, "Hello",1);
-    printhead(&q);
 
-    enqueue(&q, "World",2);
-    printf("Queue is empty: %d\n", is_empty(&q));
+    if (argc != 2)
+	{
+	    printf("usage: key < file \n");
+	    printf("!! data more than 1024 char will be ignored !!\n");
+	    return 0;
+	}
+
+	int key = atoi(argv[1]);
+	printf("key is %i \n",key);
+
+	char c;
+	int counter = 0;
+    int bigcounter=0;
+	int dest_size = 1024;
+	char data[dest_size]; 
+	
+
+	while ((c = getchar()) != EOF)
+	{
+	  data[counter] = c;
+	  counter++;
+
+	  if (counter == 1024){
+		// encrypt(data,key);
+		// printf("encripted data: %s\n",data);
+        enqueue(&q, data,bigcounter);
+        bigcounter++;
+		counter = 0;
+	  }
+	}
+	
+	if (counter > 0)
+	{
+		char lastData[counter];
+		lastData[0] = '\0';
+		strncat(lastData, data, counter);
+		// encrypt(lastData,key);
+		// printf("encripted data:\n %s\n",lastData);
+        enqueue(&q, lastData,bigcounter);
+        bigcounter++;
+	}
+
+    while(!is_empty(&q)){
+        printhead(&q);
+        dequeue(&q);
+    }
+
+
+
+
     
-    printhead(&q);
+
+
+
+    // printf("Queue is empty: %d\n", is_empty(&q));
+    // enqueue(&q, "Hello",1);
+    // printhead(&q);
+
+    // enqueue(&q, "World",2);
+    // printf("Queue is empty: %d\n", is_empty(&q));
     
-    char* str = dequeue(&q);
-    printf("Dequeued: %s\n", str);
+    // printhead(&q);
+    
+    // dequeue(&q);
    
-    printhead(&q);
+    // printhead(&q);
 
-    str = dequeue(&q);
-    printf("Dequeued: %s\n", str);
+    // dequeue(&q);
  
-    printf("Queue is empty: %d\n", is_empty(&q));
+    // printf("Queue is empty: %d\n", is_empty(&q));
     return 0;
 }
